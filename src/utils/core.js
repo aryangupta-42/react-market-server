@@ -8,7 +8,7 @@ const serverErrCode = 500;
 
 const serverErrMessage = 'An internal error occurred, Please try again later';
 
-function Core(model, field, admin = false) {
+function Core(model, admin = false) {
   const name = model.collection.collectionName;
 
   const getAll = async (_, res) => {
@@ -51,8 +51,7 @@ function Core(model, field, admin = false) {
     if (req.user.access !== 'superadmin') {
       try {
         const searchRes = await model.findById(req.params.id);
-        // eslint-disable-next-line no-underscore-dangle
-        if (searchRes.addedBy.uid.equals(req.user._id)) {
+        if (searchRes.addedBy.uid.equals(req.user.id)) {
           const updatedRes = await model.findByIdAndUpdate(req.params.id, req.body, { new: true });
           res.status(successCode).json(response(true, 'Details updated successfully', updatedRes));
         } else {
@@ -79,8 +78,7 @@ function Core(model, field, admin = false) {
     if (req.user.access !== 'superadmin') {
       try {
         const searchRes = await model.findById(req.params.id);
-        // eslint-disable-next-line no-underscore-dangle
-        if (searchRes.addedBy.uid.equals(req.user._id)) {
+        if (searchRes.addedBy.uid.equals(req.user.id)) {
           const deletedRes = await model.findByIdAndRemove(req.params.id);
           res.status(successCode).json(response(true, 'Record deleted successfully', deletedRes));
         } else {
