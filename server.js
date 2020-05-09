@@ -4,6 +4,8 @@ const dotenv = require('dotenv');
 const fs = require('fs');
 const compression = require('compression'); // compresses requests
 const bodyParser = require('body-parser');
+const passport = require('passport');
+const jwt = require('jsonwebtoken');
 
 if (fs.existsSync('.env')) {
   console.log('Using .env file to supply config environment variables');
@@ -36,6 +38,15 @@ mongoose.connect(MONGODB_URI, { useNewUrlParser: true })
 app.use(compression());
 app.use(bodyParser.json({ type: 'application/json' }));
 app.use(bodyParser.urlencoded({ extended: true }));
+
+app.use(passport.initialize());
+require('./src/helper/auth')(passport);
+
+const response = require('./src/helper/response');
+
+app.get('/', (_, res) => {
+  res.json(response(true, 'arrived at home page', null));
+});
 
 
 // SETUP APP LISTEN
