@@ -14,26 +14,18 @@ const adminSchema = new mongoose.Schema({
 });
 
 
-adminSchema.pre('save', async (next) => {
+// eslint-disable-next-line func-names
+adminSchema.pre('save', async function (next) {
   const admin = this;
-
   if (admin.password !== undefined) {
-    const hash = bcrypt.hash(admin.password, 10);
+    const hash = await bcrypt.hash(admin.password, 10);
     admin.password = hash;
   }
   next();
 });
 
-// adminSchema.methods.getAdminById = (id, callback) => {
-//   Admin.findById(id, callback);
-// };
-
-// adminSchema.methods.getAdminByName = (username, callback) => {
-//   const query = { username };
-//   Admin.findOne(query, callback);
-// };
-
-adminSchema.methods.comparePasswords = async (password) => {
+// eslint-disable-next-line func-names
+adminSchema.methods.comparePasswords = async function (password) {
   const admin = this;
   const compare = await bcrypt.compare(password, admin.password);
   return compare;
