@@ -4,6 +4,8 @@ const dotenv = require('dotenv');
 const fs = require('fs');
 const compression = require('compression'); // compresses requests
 const bodyParser = require('body-parser');
+const lusca = require('lusca');
+const cors = require('cors');
 const passport = require('passport');
 const jwt = require('jsonwebtoken');
 
@@ -19,6 +21,11 @@ const express = require('express');
 
 const app = express();
 const mongoose = require('mongoose');
+
+app.use(cors());
+app.use(lusca.xframe('SAMEORIGIN'));
+app.use(lusca.xssProtection(true));
+
 
 const secret = process.env.SECRET;
 
@@ -87,6 +94,17 @@ app.get('/', (_, res) => {
 app.get('/getUserDetails', passport.authenticate('jwt', { session: false }), (req, res) => {
   res.send(req.user);
 });
+
+const itemRouter = require('./src/controllers/item');
+const adminRouter = require('./src/controllers/admin');
+
+const apiRouter = express.Router();
+
+// SUB ROUTER
+apiRouter.use('/items', itemRouter);
+apiRouter.use('/admin', passport.authenticate('jwt', { session: false }), adminRouter);
+// APP ROUTER
+app.use('/api', apiRouter);
 
 // INITIAL SETUP ROUTES ------------
 
