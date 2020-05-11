@@ -58,28 +58,32 @@ app.post('/login', async (req, res) => {
   } = req.body;
   try {
     const searchRes = await Admin.findOne({ username });
-    if (!searchRes.username) {
-      res.status(403).json(response(false, 'Whoops!! No such user exists.', null));
-    } else {
-      const access = await searchRes.comparePasswords(password);
-      if (!access) {
-        res.status(403).json(response(false, 'Whoops!! You\'ve entered the wrong password', null));
+    if (searchRes !== null) {
+      if (!searchRes.username) {
+        res.status(401).json(response(false, 'Whoops!! No such user exists.', null));
       } else {
-        const admin = {
-          id: searchRes.id,
-          name: searchRes.name,
-          username: searchRes.username,
-          access: searchRes.access,
-        };
-        const token = jwt.sign(admin, secret, {
-          expiresIn: 604800,
-        });
-        const jsonData = {
-          admin,
-          token: `JWT ${token}`,
-        };
-        res.status(200).json(response(true, 'Login successful', jsonData));
+        const access = await searchRes.comparePasswords(password);
+        if (!access) {
+          res.status(401).json(response(false, 'Whoops!! You\'ve entered the wrong password', null));
+        } else {
+          const admin = {
+            id: searchRes.id,
+            name: searchRes.name,
+            username: searchRes.username,
+            access: searchRes.access,
+          };
+          const token = jwt.sign(admin, secret, {
+            expiresIn: 604800,
+          });
+          const jsonData = {
+            admin,
+            token: `JWT ${token}`,
+          };
+          res.status(200).json(response(true, 'Login successful', jsonData));
+        }
       }
+    } else {
+      res.status(401).json(response(false, 'Whoops!! No such user exists.', null));
     }
   } catch (err) {
     console.log(err);
